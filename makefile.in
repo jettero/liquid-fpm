@@ -295,7 +295,8 @@ install:
 	@echo "installing..."
 	mkdir -p $(libdir)
 	install -m 644 -p $(SHARED_LIB) libliquidfpm.a $(libdir)
-	$(REBIND)
+	@ echo $(REBIND)
+	@ $(REBIND) || (echo; echo "  *** please sudo ldconfig or rebind manually ***"; echo)
 	mkdir -p $(prefix)/include
 	mkdir -p $(prefix)/include/liquid
 	install -m 644 -p include/liquidfpm.h $(prefix)/include/liquid
