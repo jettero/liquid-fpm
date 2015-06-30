@@ -180,7 +180,7 @@ gentab_objects	= $(patsubst %.c,%.o,$(gentab_targets))
 # result is a program that generates a source file to be
 # built for the target system.
 $(gentab_programs) : % : %.c ./include/liquidfpm.h
-	$(CC) $(INCLUDE_CFLAGS) -lm $< -o $@
+	$(CC) $(INCLUDE_CFLAGS) $< -o $@ -lm
 
 # Run the natively-built program to generate the source
 # file.  This file is to be built for the target system.
@@ -331,11 +331,11 @@ libliquidfpm.a: $(objects)
 
 # darwin
 libliquidfpm.dylib: $(objects)
-	$(CC) $(LDFLAGS) -dynamiclib -install_name $@ -o $@ $^
+	$(CC) -dynamiclib -install_name $@ -o $@ $^ $(LDFLAGS) 
 
 # linux, et al
 libliquidfpm.so: libliquidfpm.a
-	$(CC) $(LDFLAGS) -shared -Xlinker -soname=$@ -o $@ -Wl,-whole-archive $^ -Wl,-no-whole-archive
+	$(CC) -shared -Xlinker -soname=$@ -o $@ -Wl,-whole-archive $^ -Wl,-no-whole-archive $(LDFLAGS)
 
 #
 # Tests (mostly for debugging)
@@ -346,7 +346,7 @@ test: fpmtest
 fpmtest.o: fpmtest.c include/liquidfpm.h
 
 fpmtest: fpmtest.o libliquidfpm.a
-	$(CC) $(CFLAGS) -lm $^ $(LDFLAGS) -o $@
+	$(CC) $(CFLAGS) $^ -o $@ -lm $(LDFLAGS) 
 
 ##
 ## TARGET : bench     - build and run all benchmarks
@@ -373,7 +373,7 @@ $(benchmark_include): $(benchmarkgen_prog) $(benchmark_headers)
 	./$(benchmarkgen_prog) $(benchmark_headers) > $@
 
 $(benchmark_prog): bench/bench.c $(benchmark_include) libliquidfpm.a
-	$(CC) $(BENCH_CFLAGS) -lm $< $(LDFLAGS) libliquidfpm.a -o $@
+	$(CC) $(BENCH_CFLAGS) $< libliquidfpm.a -o $@ $(LDFLAGS) -lm
 
 bench: $(benchmark_prog)
 	./$<
@@ -401,7 +401,7 @@ $(autotest_include): $(autotestgen_prog) $(autotest_headers)
 	./$(autotestgen_prog) $(autotest_headers) > $@
 
 $(autotest_prog): autotest/autotest.c $(autotest_include) libliquidfpm.a
-	$(CC) $(AUTOTEST_CFLAGS) -lm $< $(LDFLAGS) libliquidfpm.a -o $@
+	$(CC) $(AUTOTEST_CFLAGS) $< libliquidfpm.a -o $@ -lm $(LDFLAGS) 
 
 check: $(autotest_prog)
 	./$<
